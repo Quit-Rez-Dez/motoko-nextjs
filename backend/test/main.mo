@@ -26,7 +26,7 @@ actor {
     let profiles = HashMap.HashMap<Principal, Profile>(0, Principal.equal, Principal.hash);
 
     public query ({caller}) func getProfile () : async GetProfileResponse {
-        if (Principal.isAnonymous(caller)) return #err(#userNotAuthenticated);
+        //if (Principal.isAnonymous(caller)) return #err(#userNotAuthenticated);
 
         let profile = profiles.get(caller);
 
@@ -41,7 +41,7 @@ actor {
     };
 
     public shared ({caller}) func createProfile (username : Text, bio : Text) : async CreateProfileResponse {
-        if (Principal.isAnonymous(caller)) return #err(#userNotAuthenticated);
+        //if (Principal.isAnonymous(caller)) return #err(#userNotAuthenticated);
 
         let profile = profiles.get(caller);
 
