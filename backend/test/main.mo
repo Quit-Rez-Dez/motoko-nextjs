@@ -8,6 +8,8 @@ import Text "mo:base/Text";
 import Array "mo:base/Array";
 import Iter "mo:base/Iter";
 import Time "mo:base/Time";
+import Nat  "mo:base/Nat";
+import Int  "mo:base/Int";
 
 import StableHashMap "/StableHashMap";
 
@@ -48,18 +50,13 @@ actor {
 
     public shared ({ caller }) func insertarLog(username : Text, movimiento : Text) : async CreateProfileResponse {
 
-        //ingresar los datos para el log de datos
-        let profile = profiles.get(caller);
-
-        if (profile != null) return #err(#profileAlreadyExists);
-
         let newProfile : Registros = {
             username = username;
             movimiento = movimiento;
             fecha_movimiento = Time.now();
         };
 
-        stableLogs.put("OK", newProfile);
+        stableLogs.put(Int.toText(Time.now()), newProfile);
 
         #ok(true);
     };
