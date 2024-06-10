@@ -7,37 +7,19 @@ import Debug "mo:base/Debug";
 import Text "mo:base/Text";
 import Array "mo:base/Array";
 import Iter "mo:base/Iter";
+import Time "mo:base/Time";
 
 import StableHashMap "/StableHashMap";
 
-
-
 actor {
 
-
-  var stableHashMap = StableHashMap.HashMap<Text, Nat>(1, Text.equal, Text.hash);
+    var stableHashMap = StableHashMap.HashMap<Text, Nat>(1, Text.equal, Text.hash);
     stable var stableVars = stableHashMap.exportVars();
-
 
     public func put(name : Text, value : Nat) : async Text {
         stableHashMap.put(name, value);
         return name;
     };
-
-    type Key = Text;
-    type Value = Nat;
-
-
-
-
-
-public query func getAllValues(): async [(Text, Nat)] {
-    let entriesIter = stableHashMap.entries();
-    let entriesArray = Iter.toArray(entriesIter);
-    return entriesArray;
-};
-
-
 
     system func preupgrade() {
         stableVars := stableHashMap.exportVars();
@@ -48,15 +30,39 @@ public query func getAllValues(): async [(Text, Nat)] {
         stableHashMap.importVars(stableVars);
     };
 
-
-    type Timestamp = Nat64;
-    
-    type Registros={
-        username: Text;
-        movimiento:Text;
-        fecha_movimiento:Timestamp;
+    type Registros = {
+        username : Text;
+        movimiento : Text;
+        fecha_movimiento : Int;
     };
 
+    public query func getAllValues() : async [(Text, Registros)] {
+        let entriesIter = stableLogs.entries();
+        let entriesArray = Iter.toArray(entriesIter);
+        return entriesArray;
+    };
+
+    //variables para insertar los logs
+    var stableLogs = StableHashMap.HashMap<Text, Registros>(1, Text.equal, Text.hash);
+    stable var stableVarsLogs = stableLogs.exportVars();
+
+    public shared ({ caller }) func insertarLog(username : Text, movimiento : Text) : async CreateProfileResponse {
+
+        //ingresar los datos para el log de datos
+        let profile = profiles.get(caller);
+
+        if (profile != null) return #err(#profileAlreadyExists);
+
+        let newProfile : Registros = {
+            username = username;
+            movimiento = movimiento;
+            fecha_movimiento = Time.now();
+        };
+
+        stableLogs.put("OK", newProfile);
+
+        #ok(true);
+    };
 
     type Profile = {
         username : Text;
@@ -111,6 +117,4 @@ public query func getAllValues(): async [(Text, Nat)] {
         #ok(true);
     };
 
-
-   
 };
